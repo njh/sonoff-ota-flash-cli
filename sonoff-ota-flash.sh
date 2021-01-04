@@ -31,10 +31,17 @@ http_request() {
   cmd+=('-XPOST')
   cmd+=('--header' "Content-Type: application/json")
   cmd+=('--data-raw' "${body}")
-  cmd+=("http://$hostname:$HTTP_PORT/zeroconf/${path}")
+  cmd+=("http://${hostname}:${HTTP_PORT}/zeroconf/${path}")
 
-  "${cmd[@]}" | json_pretty_print
+  output=$("${cmd[@]}")
+  exit_code=$?
 
+  if [ "$exit_code" -ne 0 ]; then
+    echo "${output}"
+    exit $exit_code
+  fi
+
+  echo "${output}" | json_pretty_print
   sleep 1
 }
 

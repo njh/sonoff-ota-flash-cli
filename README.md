@@ -1,8 +1,13 @@
 sonoff-ota-flash-cli
 ====================
 
-Bash script to perform an Over the Air firmware update for Sonoff DIY device on Mac command line.
+Bash script to perform an OTA (Over the Air) firmware update for Sonoff DIY device using the Mac command line.
 The script will install Tasmota by default - unless you edit it to install something different.
+
+Modules that support the DIY Mode Protocol v2.0 (firmware 3.5.0 or higher):
+* [Basic R3](https://sonoff.tech/product/wifi-diy-smart-switches/basicr3)
+* [RF R3](https://sonoff.tech/product/wifi-smart-wall-swithes/rfr3)
+* [Mini](https://sonoff.tech/product/wifi-diy-smart-switches/sonoff-mini)
 
 What this script does:
 

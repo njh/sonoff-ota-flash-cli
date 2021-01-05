@@ -6,8 +6,8 @@
 #
 
 HTTP_PORT=8081
-BIN_URL="http://ota.tasmota.com/tasmota/release-9.1.0/tasmota.bin"
-SHASUM="4d57bd246eb8a56c5325d1a8b6383d753022c3cd85d3c4a3c735dccf46d7460c"
+BIN_URL="http://sonoff-ota.aelius.com/tasmota/9.2.0/tasmota-lite.bin"
+SHASUM="c61dd7448ce5023ca5ca8997833fd240829c902fa846bafca281f01c0c5b4d29"
 
 
 # JSON Pretty Print by Evgeny Karpov

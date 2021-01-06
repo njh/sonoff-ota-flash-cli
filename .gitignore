@@ -1,0 +1,5 @@
+*.bin
+*.sha256
+
+/website/index.html
+/website/picnic.min.css

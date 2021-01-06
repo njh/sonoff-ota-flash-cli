@@ -6,7 +6,7 @@
 #
 
 HTTP_PORT=8081
-BIN_URL="http://sonoff-ota.aelius.com/tasmota/9.2.0/tasmota-lite.bin"
+BIN_URL="http://sonoff-ota.aelius.com/tasmota-9.2.0-lite.bin"
 SHASUM="c61dd7448ce5023ca5ca8997833fd240829c902fa846bafca281f01c0c5b4d29"
 
 

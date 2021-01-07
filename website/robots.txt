@@ -1,0 +1,3 @@
+# robots.txt for http://sonoff-ota.aelius.com/
+User-Agent: *
+Allow: /

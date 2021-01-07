@@ -45,51 +45,83 @@ http_request() {
   sleep 1
 }
 
-echo "Searching for Sonoff module on network..."
-output=$(expect <<EOD
-set timeout 10
-spawn -noecho dns-sd -B _ewelink._tcp local.
-expect {
-  "  Add  " {exit 0}
-  timeout   {exit 1}
-  eof       {exit 2}
-  default   {exp_continue}
+
+lookup_ip_address() {
+  echo "Searching for Sonoff module on network..."
+  output=$(expect <<-EOD
+		set timeout 10
+		spawn -noecho dns-sd -B _ewelink._tcp local.
+		expect {
+		  "  Add  " {exit 0}
+		  timeout   {exit 1}
+		  eof       {exit 2}
+		  default   {exp_continue}
+		}
+	EOD
+  )
+
+  # Get the first 'Add' line from the output
+  line=$(echo "${output}" | grep -m 1 '  Add  ')
+  if [ -z "${line}" ]; then
+    echo "Failed to find a Sonoff module on the local network." >&2
+    exit 2
+  fi
+
+  echo "Found module on network."
+  hostname=$(echo "${line}" | awk '{sub("\r", "", $NF) ; print $NF}')
+  echo "Hostname: ${hostname}"
+
+  # Now get the IP address for the hostname
+  fqdn="${hostname}.local."
+  ipv4address=$(dscacheutil -q host -a name "${fqdn}" | grep -m 1 'ip_address' | awk '{print $2}')
+  if [ -z "${ipv4address}" ]; then
+    echo "Failed to resolve IP address for ${fqdn}" >&2
+    exit 2
+  fi
+  echo "IPv4 Address: ${ipv4address}"
+  echo
 }
-EOD
-)
+  
+display_info() {
+  echo "Getting Module Info..."
+  http_request "${ipv4address}" info
+  echo
+}
 
-# Get the first 'Add' line from the output
-line=$(echo "${output}" | grep -m 1 '  Add  ')
-if [ -z "${line}" ]; then
-  echo "Failed to find a Sonoff module on the local network." >&2
-  exit 2
+ota_unlock() {
+  echo "Unlocking for OTA flashing..."
+  # FIXME: skip this if already unlocked
+  http_request "${ipv4address}" ota_unlock
+  echo
+}
+
+ota_flash() {
+  read -p "Proceed with flashing? [N/y] " -n 1 -r
+  echo    # (optional) move to a new line
+  if [[ $REPLY =~ ^[Yy]$ ]]
+  then
+    echo "Flashing..."
+    http_request "${ipv4address}" ota_flash "{\"deviceid\":\"\",\"data\":{\"downloadUrl\":\"${BIN_URL}\",\"sha256sum\":\"${SHASUM}\"}}"
+    echo
+  else
+    echo "Aborting"
+    exit 1
+  fi
+}
+
+main() {
+  lookup_ip_address
+
+  display_info
+
+  ota_unlock
+
+  ota_flash
+  
+  echo "Done."
+}
+
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]
+then
+  main "${@:-}"
 fi
-
-echo "Found module on network."
-hostname=$(echo "${line}" | awk '{sub("\r", "", $NF) ; print $NF}')
-echo "Hostname: ${hostname}"
-
-# Now get the IP address for the hostname
-fqdn="${hostname}.local."
-ipv4address=$(dscacheutil -q host -a name "${fqdn}" | grep -m 1 'ip_address' | awk '{print $2}')
-if [ -z "${ipv4address}" ]; then
-  echo "Failed to resolve IP address for ${fqdn}" >&2
-  exit 2
-fi
-echo "IPv4 Address: ${ipv4address}"
-echo
-
-echo "Getting Info..."
-http_request "${ipv4address}" info
-echo
-
-echo "Unlocking..."
-# FIXME: skip this if already unlocked
-http_request "${ipv4address}" ota_unlock
-echo
-
-echo "Flashing..."
-http_request "${ipv4address}" ota_flash "{\"deviceid\":\"\",\"data\":{\"downloadUrl\":\"${BIN_URL}\",\"sha256sum\":\"${SHASUM}\"}}"
-echo
-
-echo "Done."

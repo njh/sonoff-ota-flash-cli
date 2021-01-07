@@ -15,9 +15,12 @@ index.html: build-index.rb
 picnic.min.css:
 	$(CURL) -o $@ 'https://raw.githubusercontent.com/franciscop/picnic/master/picnic.min.css'
 
+deploy: build
+	rsync -avc --exclude Makefile --exclude '*.rb' . sonoff-ota.aelius.com:/srv/www/sonoff-ota/
 
 clean:
+	rm -f .DS_Store
 	rm -f $(GENERATED_FILES)
 
 
-.PHONY: build clean
+.PHONY: build clean deploy

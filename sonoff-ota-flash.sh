@@ -5,7 +5,6 @@
 # Uses the 'dns-sd' command, which is only available on Mac OS.
 #
 
-HTTP_PORT=8081
 BIN_URL="http://sonoff-ota.aelius.com/tasmota-9.2.0-lite.bin"
 SHASUM="c61dd7448ce5023ca5ca8997833fd240829c902fa846bafca281f01c0c5b4d29"
 
@@ -17,7 +16,7 @@ json_pretty_print() {
   awk '{if ($0 ~ /^[}\]]/ ) offset-=4; printf "%*c%s\n", offset, " ", $0; if ($0 ~ /^[{\[]/) offset+=4}'
 }
 
-http_request() {
+sonoff_http_request() {
   local hostname="${1}"
   local path="${2}"
   local body="${3:-}"
@@ -31,7 +30,7 @@ http_request() {
   cmd+=('-XPOST')
   cmd+=('--header' "Content-Type: application/json")
   cmd+=('--data-raw' "${body}")
-  cmd+=("http://${hostname}:${HTTP_PORT}/zeroconf/${path}")
+  cmd+=("http://${hostname}:8081/zeroconf/${path}")
 
   output=$("${cmd[@]}")
   exit_code=$?
@@ -84,14 +83,14 @@ lookup_ip_address() {
   
 display_info() {
   echo "Getting Module Info..."
-  http_request "${ipv4address}" info
+  sonoff_http_request "${ipv4address}" info
   echo
 }
 
 ota_unlock() {
   echo "Unlocking for OTA flashing..."
   # FIXME: skip this if already unlocked
-  http_request "${ipv4address}" ota_unlock
+  sonoff_http_request "${ipv4address}" ota_unlock
   echo
 }
 
@@ -101,7 +100,7 @@ ota_flash() {
   if [[ $REPLY =~ ^[Yy]$ ]]
   then
     echo "Flashing..."
-    http_request "${ipv4address}" ota_flash "{\"deviceid\":\"\",\"data\":{\"downloadUrl\":\"${BIN_URL}\",\"sha256sum\":\"${SHASUM}\"}}"
+    sonoff_http_request "${ipv4address}" ota_flash "{\"deviceid\":\"\",\"data\":{\"downloadUrl\":\"${BIN_URL}\",\"sha256sum\":\"${SHASUM}\"}}"
     echo
   else
     echo "Aborting"

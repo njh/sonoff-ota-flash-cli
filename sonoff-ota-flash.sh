@@ -5,7 +5,7 @@
 # Uses the 'dns-sd' command, which is only available on Mac OS.
 #
 
-BIN_URL="http://sonoff-ota.aelius.com/tasmota-9.2.0-lite.bin"
+FIRMWARE_URL="http://sonoff-ota.aelius.com/tasmota-9.2.0-lite.bin"
 SHASUM="c61dd7448ce5023ca5ca8997833fd240829c902fa846bafca281f01c0c5b4d29"
 
 
@@ -126,11 +126,28 @@ ota_flash() {
   if [[ $REPLY =~ ^[Yy]$ ]]
   then
     echo "Flashing..."
-    sonoff_http_request "${IPADDRESS}" ota_flash "{\"deviceid\":\"\",\"data\":{\"downloadUrl\":\"${BIN_URL}\",\"sha256sum\":\"${SHASUM}\"}}"
+    sonoff_http_request "${IPADDRESS}" ota_flash "{\"deviceid\":\"\",\"data\":{\"downloadUrl\":\"${FIRMWARE_URL}\",\"sha256sum\":\"${SHASUM}\"}}"
     echo
   else
     echo "Aborting"
     exit 1
+  fi
+}
+
+check_firmware_exists() {
+  echo "Checking new firmware file exists"
+  output=$(curl '--fail' '--silent' '--show-error' '--head' "${FIRMWARE_URL}")
+  exit_code=$?
+  if [ "$exit_code" -ne 0 ]; then
+    if [ "$exit_code" -eq 22 ]; then
+      echo "The firmware file does not exist: ${FIRMWARE_URL}" >&2
+    else
+      echo "There was an error checking if firmware exists: ${FIRMWARE_URL}" >&2
+    fi
+    exit $exit_code
+  else
+    echo "OK"
+    echo
   fi
 }
 
@@ -140,6 +157,8 @@ main() {
   display_info
 
   ota_unlock
+
+  check_firmware_exists
 
   ota_flash
   

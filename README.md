@@ -1,7 +1,7 @@
 sonoff-ota-flash-cli
 ====================
 
-Bash script to perform an OTA (Over the Air) firmware update for Sonoff DIY device using the Mac command line.
+Bash script to perform an OTA (Over the Air) firmware update for Sonoff DIY device using the command line.
 The script will install Tasmota by default - unless you edit it to install something different.
 
 Modules that support the DIY Mode Protocol v2.0 (firmware 3.5.0 or higher):
@@ -23,14 +23,23 @@ Requirements
 
 This script uses the following commands:
 
-* `dns-sd` (used to find the module's hostname on the network)
-* `expect` (used to timeout if dns-sd doesn't find anything)
-* `dscacheutil` (used to resolve local hostname to an IP address)
+* `dns-sd` (used to find the module's hostname on the network on Mac OS)
+* `avahi-browse` (used to find the module's hostname on the network on Linux)
+* `expect` (used on Mac OS to timeout if dns-sd doesn't find anything)
+* `dscacheutil` / `getent`(used to resolve local hostname to an IP address)
 * `curl` (used to make HTTP requests)
 
 All of these should be installed on Mac OS by default.
+But if you don't have [curl](https://curl.se/) on your system, then you might want to install [Homebrew](https://brew.sh/) then run:
 
-It will not run on Linux because:
+```
+brew install curl
+```
 
-- `dns-sd` is not available on Linux (and `avahi-browse` is not available on Mac)
+On Debian / Ubuntu you may need to run:
+
+```
+sudo apt install curl avahi-utils
+```
+
 

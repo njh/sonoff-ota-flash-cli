@@ -58,36 +58,50 @@ lookup_ip_address() {
   fi
 }
 
+mdns_browse() {
+  local service="${1}"
+  local domain="${2:local.}"
+  if command -v dns-sd &> /dev/null; then
+    # Use the 'dns-sd' command on Mac OS
+    # expect is used because dns-sd doesn't timeout
+    output=$(expect <<-EOD
+			set timeout 10
+			spawn -noecho dns-sd -B ${service} ${domain}
+			expect {
+			  "  Add  " {exit 0}
+			  timeout   {exit 1}
+			  eof       {exit 2}
+			  default   {exp_continue}
+			}
+		EOD
+    )
+    # Find the first 'Add' line from the output
+    echo "${output}" | grep -m 1 '  Add  ' | awk '{sub("\r", "", $NF); print $NF}'
+  elif command -v avahi-browse &> /dev/null; then
+    # Use the 'avahi-browse' command on Linux
+    avahi-browse -pt -d "${domain}" "${service}" | awk 'BEGIN {FS=";"} {if ($1=="+" && $3=="IPv4") print $4}'
+  else
+    echo "Unable to perform multicast DNS discovery : didn't find dns-sd or avahi-browse." >&2
+    exit 1
+  fi
+}
+
 discover_module() {
   echo "Searching for Sonoff module on network..."
-  output=$(expect <<-EOD
-		set timeout 10
-		spawn -noecho dns-sd -B _ewelink._tcp local.
-		expect {
-		  "  Add  " {exit 0}
-		  timeout   {exit 1}
-		  eof       {exit 2}
-		  default   {exp_continue}
-		}
-	EOD
-  )
-
-  # Get the first 'Add' line from the output
-  line=$(echo "${output}" | grep -m 1 '  Add  ')
-  if [ -z "${line}" ]; then
+  hostname=$(mdns_browse '_ewelink._tcp')
+  if [ -z "${hostname}" ]; then
     echo "Failed to find a Sonoff module on the local network." >&2
     exit 2
+  else
+    echo "Found module on network."
+    echo "Hostname: ${hostname}"
   fi
 
-  echo "Found module on network."
-  hostname=$(echo "${line}" | awk '{sub("\r", "", $NF) ; print $NF}')".local."
-  echo "Hostname: ${hostname}"
-
   # Now get the IP address for the hostname
-  IPADDRESS=$(lookup_ip_address "${hostname}")
+  IPADDRESS=$(lookup_ip_address "${hostname}.local.")
   if [ -z "${IPADDRESS}" ]; then
     echo "Failed to resolve IP address for ${hostname}" >&2
-    exit 2
+    exit 3
   fi
   echo "IPv4 Address: ${IPADDRESS}"
   echo

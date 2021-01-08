@@ -6,7 +6,7 @@
 #
 
 FIRMWARE_URL="http://sonoff-ota.aelius.com/tasmota-9.2.0-lite.bin"
-SHASUM="c61dd7448ce5023ca5ca8997833fd240829c902fa846bafca281f01c0c5b4d29"
+SHASUM=
 
 
 # JSON Pretty Print by Evgeny Karpov
@@ -151,6 +151,26 @@ check_firmware_exists() {
   fi
 }
 
+lookup_shasum() {
+  echo "Looking up sha256sum for firmware"
+  output=$(curl '--fail' '--silent' '--show-error' "${FIRMWARE_URL}.sha256")
+  exit_code=$?
+  if [ "$exit_code" -ne 0 ]; then
+    echo "Failed to get .sha256 file for: ${FIRMWARE_URL}" >&2
+    exit $exit_code
+  fi
+
+  # Check it looks like it is in the right format
+  if [[ $output =~ ^([0-9a-f]{64})\ \*(.+)$ ]]; then
+    SHASUM="${BASH_REMATCH[1]}"
+    echo "OK"
+    echo
+  else
+    echo "Failed to parse SHA256 sum from file: ${output}" >&2
+    exit 2
+  fi
+}
+
 main() {
   discover_module
 
@@ -159,6 +179,10 @@ main() {
   ota_unlock
 
   check_firmware_exists
+
+  if [ -z "${SHASUM:-}" ]; then
+    lookup_shasum
+  fi
 
   ota_flash
   

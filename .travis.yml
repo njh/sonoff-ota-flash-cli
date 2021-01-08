@@ -8,11 +8,13 @@ addons:
   apt:
     packages:
       - shellcheck
+      - shunit2
   homebrew:
     packages:
       - shellcheck
+      - shunit2
     update: true
 
 script:
-  -	shellcheck --shell=bash sonoff-ota-flash.sh
-
+  - shellcheck --shell=bash sonoff-ota-flash.sh
+  - make -C test test

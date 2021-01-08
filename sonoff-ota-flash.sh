@@ -46,6 +46,19 @@ sonoff_http_request() {
 
 
 lookup_ip_address() {
+  local hostname="${1}"
+  # We use dscacheutil / getent because it can do multicast dns lookups
+  if command -v dscacheutil &> /dev/null; then
+    dscacheutil -q host -a name "${hostname}" | grep -m 1 'ip_address:' | awk '{print $2}'
+  elif command -v getent &> /dev/null; then
+    getent ahostsv4 "${hostname}" | grep -m 1 -oE "^([0-9]{1,3}\.){3}[0-9]{1,3}"
+  else
+    echo "Unable to resolve hostname to ip address: didn't find dscacheutil or getent." >&2
+    exit 1
+  fi
+}
+
+discover_module() {
   echo "Searching for Sonoff module on network..."
   output=$(expect <<-EOD
 		set timeout 10
@@ -67,30 +80,29 @@ lookup_ip_address() {
   fi
 
   echo "Found module on network."
-  hostname=$(echo "${line}" | awk '{sub("\r", "", $NF) ; print $NF}')
+  hostname=$(echo "${line}" | awk '{sub("\r", "", $NF) ; print $NF}')".local."
   echo "Hostname: ${hostname}"
 
   # Now get the IP address for the hostname
-  fqdn="${hostname}.local."
-  ipv4address=$(dscacheutil -q host -a name "${fqdn}" | grep -m 1 'ip_address' | awk '{print $2}')
-  if [ -z "${ipv4address}" ]; then
-    echo "Failed to resolve IP address for ${fqdn}" >&2
+  IPADDRESS=$(lookup_ip_address "${hostname}")
+  if [ -z "${IPADDRESS}" ]; then
+    echo "Failed to resolve IP address for ${hostname}" >&2
     exit 2
   fi
-  echo "IPv4 Address: ${ipv4address}"
+  echo "IPv4 Address: ${IPADDRESS}"
   echo
 }
   
 display_info() {
   echo "Getting Module Info..."
-  sonoff_http_request "${ipv4address}" info
+  sonoff_http_request "${IPADDRESS}" info
   echo
 }
 
 ota_unlock() {
   echo "Unlocking for OTA flashing..."
   # FIXME: skip this if already unlocked
-  sonoff_http_request "${ipv4address}" ota_unlock
+  sonoff_http_request "${IPADDRESS}" ota_unlock
   echo
 }
 
@@ -100,7 +112,7 @@ ota_flash() {
   if [[ $REPLY =~ ^[Yy]$ ]]
   then
     echo "Flashing..."
-    sonoff_http_request "${ipv4address}" ota_flash "{\"deviceid\":\"\",\"data\":{\"downloadUrl\":\"${BIN_URL}\",\"sha256sum\":\"${SHASUM}\"}}"
+    sonoff_http_request "${IPADDRESS}" ota_flash "{\"deviceid\":\"\",\"data\":{\"downloadUrl\":\"${BIN_URL}\",\"sha256sum\":\"${SHASUM}\"}}"
     echo
   else
     echo "Aborting"
@@ -109,7 +121,7 @@ ota_flash() {
 }
 
 main() {
-  lookup_ip_address
+  discover_module
 
   display_info
 

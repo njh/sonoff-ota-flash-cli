@@ -33,5 +33,4 @@ All of these should be installed on Mac OS by default.
 It will not run on Linux because:
 
 - `dns-sd` is not available on Linux (and `avahi-browse` is not available on Mac)
-- `dscacheutil` is not available on Linux (and `getent` is not available on Mac)
 

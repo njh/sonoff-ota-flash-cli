@@ -2,12 +2,11 @@
 #
 # BASH Shell script to flash a Sonoff DIY module Over The Air.
 # 
-# Uses the 'dns-sd' command, which is only available on Mac OS.
-#
 
-FIRMWARE_URL="http://sonoff-ota.aelius.com/tasmota-9.2.0-lite.bin"
+FIRMWARE_URL_BASE="http://sonoff-ota.aelius.com/"
+DEFAULT_FILENAME="tasmota-latest-lite.bin"
+IPADDRESS=
 SHASUM=
-
 
 # JSON Pretty Print by Evgeny Karpov
 # https://stackoverflow.com/a/38607019/1156096
@@ -157,6 +156,7 @@ lookup_shasum() {
   exit_code=$?
   if [ "$exit_code" -ne 0 ]; then
     echo "Failed to get .sha256 file for: ${FIRMWARE_URL}" >&2
+    echo "Please add a .sha256 file to server, or pass the SHA256 on the command line" >&2
     exit $exit_code
   fi
 
@@ -171,18 +171,91 @@ lookup_shasum() {
   fi
 }
 
+display_help() {
+  printf "Usage: %s [options] [<filename or url>]\n" "${0}"
+  printf -- "\nOptions:\n"
+  grep -E -e '^[[:space:]]*# PARAM_Usage:' -e '^[[:space:]]*# PARAM_Description:' "${0}" | while read -r usage; read -r description; do
+    if [[ ! "${usage}" =~ Usage ]] || [[ ! "${description}" =~ Description ]]; then
+      _exiterr "Error generating help text."
+    fi
+    printf " %-32s %s\n" "${usage##"# PARAM_Usage: "}" "${description##"# PARAM_Description: "}"
+  done
+
+  exit 1
+}
+
+
+parse_options() {
+  check_parameters() {
+    if [[ -z "${1:-}" ]]; then
+      echo "The specified command requires additional parameters. See help:" >&2
+      display_help >&2
+      exit 1
+    elif [[ "${1:0:1}" = "-" ]]; then
+      _exiterr "Invalid argument: ${1}"
+    fi
+  }
+
+  local params=()
+  while (( "$#" )); do
+    case "$1" in
+      # PARAM_Usage: -i, --ipaddress <ipaddress>
+      # PARAM_Description: Specify the IP address of the Sonoff module
+      -i|--ipaddress)
+        shift 1
+        check_parameters "${1:-}"
+        IPADDRESS="${1}"
+        ;;
+      # PARAM_Usage: -s, --sha256 <sha256>
+      # PARAM_Description: Specify the SHA256 sum of the firmware
+      -s|--sha256)
+        shift 1
+        check_parameters "${1:-}"
+        SHASUM="${1}"
+        ;;
+      -*)
+        echo "Error: Unsupported flag $1" >&2
+        display_help
+        ;;
+      *) # preserve positional arguments
+        if [ -n "$1" ]; then
+          params+=("$1")
+        fi
+        ;;
+    esac
+    shift
+  done
+
+  if [ "${#params[@]}" -eq 0 ]; then
+    FIRMWARE_URL="${DEFAULT_FILENAME}"
+  elif [ "${#params[@]}" -eq 1 ]; then
+    FIRMWARE_URL="${params[0]}"
+  else
+    display_help
+  fi
+
+  # If the filename doesn't start http: then prepend the base URL  
+  if [[ ! ${FIRMWARE_URL} =~ ^https?: ]]; then
+    FIRMWARE_URL="${FIRMWARE_URL_BASE}${FIRMWARE_URL}"
+  fi
+}
+
 main() {
-  discover_module
-
-  display_info
-
-  ota_unlock
+  parse_options "${@:-}"
 
   check_firmware_exists
 
   if [ -z "${SHASUM:-}" ]; then
     lookup_shasum
   fi
+
+  if [ -z "${IPADDRESS:-}" ]; then
+    discover_module
+  fi
+
+  display_info
+
+  ota_unlock
 
   ota_flash
   

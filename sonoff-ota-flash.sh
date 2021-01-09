@@ -126,7 +126,7 @@ ota_flash() {
   echo    # (optional) move to a new line
   if [[ $REPLY =~ ^[Yy]$ ]]
   then
-    echo "Flashing..."
+    echo "Requesting OTA flashing..."
     sonoff_http_request "${IPADDRESS}" ota_flash "{\"deviceid\":\"\",\"data\":{\"downloadUrl\":\"${FIRMWARE_URL}\",\"sha256sum\":\"${SHASUM}\"}}"
     echo
   else
@@ -267,7 +267,7 @@ main() {
 
   ota_flash
   
-  echo "Done."
+  echo "Please wait for your device to finish flashing."
 }
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]

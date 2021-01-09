@@ -175,7 +175,8 @@ lookup_shasum() {
 
 display_help() {
   printf "Usage: %s [options] [<filename or url>]\n" "${0}"
-  printf -- "\nOptions:\n"
+  printf "If just a filename is given, it is relative to %s\n\n" "${FIRMWARE_URL_BASE}"
+  printf -- "Options:\n"
   grep -E -e '^[[:space:]]*# PARAM_Usage:' -e '^[[:space:]]*# PARAM_Description:' "${0}" | while read -r usage; read -r description; do
     if [[ ! "${usage}" =~ Usage ]] || [[ ! "${description}" =~ Description ]]; then
       _exiterr "Error generating help text."
@@ -214,6 +215,11 @@ parse_options() {
         shift 1
         check_parameters "${1:-}"
         SHASUM="${1}"
+        ;;
+      # PARAM_Usage: -h, --help
+      # PARAM_Description: Display this message
+      -h|--help)
+        display_help
         ;;
       -*)
         echo "Error: Unsupported flag $1" >&2

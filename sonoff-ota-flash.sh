@@ -19,6 +19,7 @@ sonoff_http_request() {
   local hostname="${1}"
   local path="${2}"
   local body="${3:-}"
+  local url="http://${hostname}:8081/zeroconf/${path}"
 
   if [ -z "${body}" ]; then
     body='{"deviceid":"","data":{}}'
@@ -29,12 +30,13 @@ sonoff_http_request() {
   cmd+=('-XPOST')
   cmd+=('--header' "Content-Type: application/json")
   cmd+=('--data-raw' "${body}")
-  cmd+=("http://${hostname}:8081/zeroconf/${path}")
+  cmd+=("${url}")
 
   output=$("${cmd[@]}")
   exit_code=$?
 
   if [ "$exit_code" -ne 0 ]; then
+    echo "Error posting to: ${url}"
     echo "${output}"
     exit $exit_code
   fi

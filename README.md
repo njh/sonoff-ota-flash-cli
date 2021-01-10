@@ -148,7 +148,7 @@ Contact
 
 
 
-[Tasmota]:     https://tasmota.github.io/
+[Tasmota]:     http://www.tasmota.com/
 [HomeBrew]:    https://brew.sh/
 [curl]:        https://curl.se/
 [zip file]:    https://github.com/njh/sonoff-ota-flash-cli/archive/main.zip

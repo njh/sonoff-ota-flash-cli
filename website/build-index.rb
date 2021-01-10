@@ -23,6 +23,45 @@ __END__
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="picnic.min.css" />
+  <style type="text/css">
+    html, body, main
+    {
+      display: block;
+      width: 100%;
+      margin: 0;
+      background-color: #FAFCFC;
+    }
+
+    body
+    {
+      padding: 10px;
+      max-width: 960px;
+      width: 100%;
+      margin-right: auto;
+    }
+    
+    footer
+    {
+      border-top: 1px rgba(170,170,170,0.2) solid;
+      margin-top: 100px;
+      padding-top: 5px;
+      padding-bottom: 10px;
+    }
+
+    .shasum {
+      font-size: .75em;
+      color: #d63384;
+      word-wrap: break-word;
+      background: none;
+      padding: 0;
+    }
+
+    @media only screen and (max-width: 900px) {
+      .shacol {
+        display: none;
+      }
+    }
+  </style>
 </head>
 <body>
   <h1>Sonoff OTA Open Source Firmware</h1>
@@ -40,12 +79,12 @@ __END__
     The binaries are the same as on the main <a href="http://ota.tasmota.com/tasmota/">Tasmota OTA server</a>.
   </p>
 
-  <table>
+  <table class="primary">
     <thead>
       <tr>
         <th>Filename</th>
         <th>File Size</th>
-        <th>SHA256</th>
+        <th class="shacol">SHA256</th>
       </tr>
     </thead>
 
@@ -54,7 +93,7 @@ __END__
         <tr>
           <td><a href="http://sonoff-ota.aelius.com/<%= file[:filename] %>"><%= file[:filename] %></a></td>
           <td><%= file[:size] / 1000 %>k</td>
-          <td><code><%= file[:sha256] %></code></td>
+          <td class="shacol"><code class="shasum"><%= file[:sha256] %></code></td>
         </tr>
       <% end %>
     </tbody>

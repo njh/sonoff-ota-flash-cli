@@ -28,7 +28,16 @@ __END__
   <h1>Sonoff OTA Open Source Firmware</h1>
 
   <p>
+    This server was setup to provide firmware images for the <a href="https://github.com/njh/sonoff-ota-flash-cli">sonoff-ota-flash-cli</a> script.
+  
+    A seperate server was setup because:
+    <ul>
+      <li>There is a bug in the Sonoff 3.5.0 firmware that means the <code>Host</code> header is always set to <code>dl.itead.cn</code></li>
+      <li>It provides SHA256 checksum calculations for each of the firmware files (append .sha256 to the URL)</li>
+      <li>Only includes firmware less than 508kB (the maximum allowed by Sonoff OTA flashing)</li>
+    </ul>
     
+    The binaries are the same as on the main <a href="http://ota.tasmota.com/tasmota/">Tasmota OTA server</a>.
   </p>
 
   <table>
@@ -50,6 +59,13 @@ __END__
       <% end %>
     </tbody>
   </table>
+
+  <footer>
+    <p>
+      Tasmota is Copyright (C) 2020 Theo Arends and released under the GNU General Public License.
+      See the <a href="https://tasmota.github.io/docs/">Tasmota website</a> for more information.
+    </p>
+  </footer>
 
 </body>
 </html>

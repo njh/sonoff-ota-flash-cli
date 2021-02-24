@@ -10,6 +10,8 @@ Dir.glob("*.bin") do |filename|
   }
 end
 
+files.sort_by! { |f| f[:filename] }.reverse!
+
 erb = ERB.new(DATA.read)
 puts erb.result()
 

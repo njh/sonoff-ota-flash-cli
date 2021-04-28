@@ -20,7 +20,7 @@ What this script does:
 Installation
 ============
 
-Either download the whole repo as [zip file], or just download the bash script using:
+Either download the whole repo as a [zip file] or just download the bash script using:
 
 ```sh
 curl -O https://raw.githubusercontent.com/njh/sonoff-ota-flash-cli/main/sonoff-ota-flash.sh
@@ -32,7 +32,7 @@ The script uses the following commands:
 * `dns-sd` (used to find the module's hostname on the network on Mac OS)
 * `avahi-browse` (used to find the module's hostname on the network on Linux)
 * `expect` (used on Mac OS to timeout if dns-sd doesn't find anything)
-* `dscacheutil` / `getent`(used to resolve local hostname to an IP address)
+* `dscacheutil` / `getent` (used to resolve a local hostname to an IP address)
 * `curl` (used to make HTTP requests)
 
 All of these should be installed on Mac OS by default.
@@ -54,7 +54,7 @@ Usage
 
 Given no parameters, this script will find a Sonoff module (in DIY mode) on your network and flash it with the latest version of [Tasmota].
 
-A final-confirmation prompt is displayed before going ahead with flashing.
+A final confirmation prompt is displayed before going ahead with flashing.
 
 ```sh
 Usage: ./sonoff-ota-flash.sh [options] [<filename or url>]
@@ -70,7 +70,7 @@ Options:
 
 * If you have more than one module, or auto-discovery isn't working you can use `-i` to specify the IP address of the module to flash
 * If you give it a filename, it will try and use that file from http://sonoff-ota.aelius.com/
-* If you give it a full URL, it will try use that but you must either create a `.sha256` file or provide the SHA256 sum using the `-s` command line options
+* If you give it a full URL, it will try to use that but you must either create a `.sha256` file or provide the SHA256 sum using the `-s` command-line options
 
 
 Example run
@@ -129,8 +129,8 @@ Requesting OTA flashing...
 Please wait for your device to finish flashing.
 ```
 
-Unfortunately there isn't a way of knowing if flashing still in progress with this script.
-But after a short while the device should reset and start advertising a new Wifi network called something like `tasmota_62E43F-1087`.
+Unfortunately, there isn't a way of knowing if flashing still in progress with this script.
+But after a short while, the device should reset and start advertising a new Wifi network called something like `tasmota_62E43F-1087`.
 
 
 License

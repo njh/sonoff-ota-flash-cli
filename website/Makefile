@@ -4,12 +4,15 @@ FIRMWARE_FILES=$(wildcard *.bin)
 SHA256_FILES=$(FIRMWARE_FILES:%.bin=%.bin.sha256)
 GENERATED_FILES=$(SHA256_FILES) picnic.min.css index.html
 
-build: $(GENERATED_FILES)
+build: $(GENERATED_FILES) index.html
+
+download:
+	ruby download-latest.rb
 
 %.bin.sha256: %.bin
 	sha256sum --binary $< > $@ 
 
-index.html: build-index.rb
+index.html: $(FIRMWARE_FILES) $(SHA256_FILES) build-index.rb
 	ruby build-index.rb > $@
 
 picnic.min.css:
@@ -23,4 +26,4 @@ clean:
 	rm -f $(GENERATED_FILES)
 
 
-.PHONY: build clean deploy
+.PHONY: build download clean deploy

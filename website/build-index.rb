@@ -81,7 +81,7 @@ __END__
       <li>Only includes firmware less than 508kB (the maximum allowed by Sonoff OTA flashing)</li>
     </ul>
     
-    The binaries are the same as on the main <a href="http://ota.tasmota.com/tasmota/">Tasmota OTA server</a>.
+    The binaries are fetched from the main <a href="https://github.com/arendst/Tasmota/releases/">Tasmota Github releases page</a>.
   </p>
 
   <table class="primary">

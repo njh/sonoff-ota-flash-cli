@@ -1,8 +1,11 @@
 language: shell
 
-os:
-  - linux
-  - osx
+jobs:
+  include:
+    - os: linux
+      dist: focal
+    - os: osx
+      osx_image: xcode12.5
 
 addons:
   apt:
@@ -13,7 +16,6 @@ addons:
     packages:
       - shellcheck
       - shunit2
-    update: true
 
 script:
   - shellcheck --shell=bash sonoff-ota-flash.sh

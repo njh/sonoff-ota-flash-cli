@@ -4,6 +4,8 @@ require 'json'
 require 'uri'
 require 'fileutils'
 
+# Maxium size of firmware allowed by Sonoff OTA flashing
+MAX_SIZE = 520192
 
 def find_asset(release, name)
   asset = release['assets'].find {|a| a['name'] == name}

@@ -1,0 +1,91 @@
+---
+
+- hosts: all
+  become: true
+  tasks:
+  - name: Install nginx package
+    apt:
+      name:
+        - nginx
+      update_cache: yes
+      state: latest
+
+  - name: "Ensure group sonoff-ota exists"
+    group:
+      name: sonoff-ota
+      state: present
+
+  - name: "Ensure user sonoff-ota exists"
+    user:
+      name: sonoff-ota
+      comment: 'Sonoff OTA'
+      group: sonoff-ota
+      shell: /bin/bash
+      createhome: yes
+      home: /home/sonoff-ota
+      system: yes
+
+  - name: 'Set permissions for .ssh'
+    file:
+      path: /home/sonoff-ota/.ssh
+      state: directory
+      owner: sonoff-ota
+      group: sonoff-ota
+      mode: 0755
+
+  - name: 'Copy accross SSH authorized keys file'
+    copy:
+      src: authorized_keys
+      dest: /home/sonoff-ota/.ssh/authorized_keys
+      owner: sonoff-ota
+      group: sonoff-ota
+      mode: 0644
+
+  - name: 'Create /srv/www/empty'
+    file:
+      path: /srv/www/empty
+      state: directory
+      owner: root
+      group: root
+      mode: 0755
+
+  - name: 'Create /srv/www/sonoff-ota'
+    file:
+      path: /srv/www/sonoff-ota
+      state: directory
+      owner: sonoff-ota
+      group: sonoff-ota
+      mode: 0755
+
+  - name: 'Copy accross Nginx configuration file'
+    copy:
+      src: nginx.conf
+      dest: /etc/nginx/sites-available/sonoff-ota
+    notify:
+    - 'Restart Nginx'
+
+  - name: 'Enable Nginx configuration file'
+    file:
+      src: /etc/nginx/sites-available/sonoff-ota
+      dest: /etc/nginx/sites-enabled/sonoff-ota
+      state: link
+    notify:
+    - 'Restart Nginx'
+
+  - name: 'Disable Nginx default configuration file'
+    file:
+      path: /etc/nginx/sites-enabled/default
+      state: absent
+    notify:
+    - 'Restart Nginx'
+
+  - name: Enable service nginx
+    service:
+      name: nginx
+      state: started
+      enabled: yes
+
+  handlers:
+  - name: 'Restart Nginx'
+    become: true
+    service: name=nginx state=restarted

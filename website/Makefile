@@ -19,7 +19,13 @@ picnic.min.css:
 	$(CURL) -o $@ 'https://raw.githubusercontent.com/franciscop/picnic/master/picnic.min.css'
 
 deploy: build
-	rsync -avc --exclude .DS_Store --exclude Makefile --exclude '*.rb' . sonoff-ota.aelius.com:/srv/www/sonoff-ota/
+	rsync -avc \
+	  --exclude .DS_Store \
+	  --exclude ansible \
+	  --exclude Makefile \
+	  --exclude '*.rb' \
+	  . \
+	  sonoff-ota@aristides.aelius.com:/srv/www/sonoff-ota/
 
 clean:
 	rm -f .DS_Store

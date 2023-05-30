@@ -80,11 +80,17 @@ Tested Operating Systems
 
 The sonoff-ota-flash.sh script has been tested with the following operating systems:
 
-| OS                   | Working | Notes                        |
-|----------------------|---------|------------------------------|
-| Mac OS 12.3.1        |   ✅    | dns-sd/1558.0.56 curl/7.79.1 |
-| Raspberry Pi OS 11.3 |   ✅    | avahi-browse/0.8 curl/7.74.0 | 
-| Windows 10           |   ❌    | Likely problems with Multicast DNS for device discovery? |
+| OS                         | Working | Notes                        |
+|----------------------------|---------|------------------------------|
+| Mac OS 12.3.1              |   ✅    | dns-sd/1558.0.56 curl/7.79.1 |
+| Raspberry Pi OS 11.3       |   ✅    | avahi-browse/0.8 curl/7.74.0 | 
+| Windows 10 and possibly 11 |   ✅    | Need do the following Windows requirements** | 
+
+**Windows 10 requirements: Need to install Windows Subsystem for Linux, then install Debian from the Windows Store, open Debian Linux command prompt and run the following commands:
+sudo apt-get update
+sudo apt-get install curl avahi-utils
+Now you can download the bash script using the command above.
+Run the command ./sonoff-ota-flash.sh with option -i to specify the device IP.
 
 It is possible that it may work on other OS too.
 If you have success on another OS, please raise a Pull Request with the details, to let other people know.

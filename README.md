@@ -90,7 +90,7 @@ The sonoff-ota-flash.sh script has been tested with the following operating syst
 sudo apt-get update
 sudo apt-get install curl avahi-utils
 Now you can download the bash script using the command above.
-Run the command ./sonoff-ota-flash.sh with option -i to specify the device IP.
+Run the command ./sonoff-ota-flash.sh with option -i to specify the device IP since Multicast DNS for device discovery doesn't seem to work here.
 
 It is possible that it may work on other OS too.
 If you have success on another OS, please raise a Pull Request with the details, to let other people know.

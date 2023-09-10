@@ -22,7 +22,7 @@ sonoff_http_request() {
   local url="http://${hostname}:8081/zeroconf/${path}"
 
   if [ -z "${body}" ]; then
-    body='{"deviceid":"","data":{}}'
+    body='{"data":{}}'
   fi
 
   # Build up the curl command arguments as an array
@@ -127,7 +127,7 @@ ota_flash() {
   if [[ $REPLY =~ ^[Yy]$ ]]
   then
     echo "Requesting OTA flashing..."
-    sonoff_http_request "${IPADDRESS}" ota_flash "{\"deviceid\":\"\",\"data\":{\"downloadUrl\":\"${FIRMWARE_URL}\",\"sha256sum\":\"${SHASUM}\"}}"
+    sonoff_http_request "${IPADDRESS}" ota_flash "{\"data\":{\"downloadUrl\":\"${FIRMWARE_URL}\",\"sha256sum\":\"${SHASUM}\"}}"
     echo
   else
     echo "Aborting"
